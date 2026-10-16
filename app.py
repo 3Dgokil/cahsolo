@@ -26,7 +26,7 @@ LANGUAGES = [
     "Dansk (Danish)", "Suomi (Finnish)", "Bahasa lain (isi sendiri)"
 ]
 
-BASE_URL = "https://clariohub.id/v1""
+BASE_URL = "https://clariohub.id/v1"
 
 def api_key():
     try:
