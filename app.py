@@ -26,7 +26,7 @@ LANGUAGES = [
     "Dansk (Danish)", "Suomi (Finnish)", "Bahasa lain (isi sendiri)"
 ]
 
-BASE_URL = "https://api.clariohub.id/v1"
+BASE_URL = "https://clariohub.id/v1""
 
 def api_key():
     try:
@@ -180,7 +180,7 @@ with st.sidebar:
         ).strip()
     st.write("ClarioHub API:", "✅ Key tersedia" if key else "⚠️ Masukkan API key")
     st.caption(f"Endpoint: {BASE_URL}")
-    model = st.text_input("Nama model (harus persis dari penyedia)", "gemini-3.7-flash")
+    model = st.text_input("Nama model (harus persis dari penyedia)", "clario/gemini-3.7-flash")
     st.divider()
     st.header("Pengaturan konten")
     language_choice = st.selectbox("🌎 Bahasa cerita & dialog", LANGUAGES, index=0)
