@@ -1,6 +1,7 @@
-SHORTS SUBSCRIBER STUDIO — CTA FIX
+Hanya koneksi API yang diganti dari Google Gemini langsung ke ClarioHub. Prompt cerita, fitur, pilihan gaya/durasi/humor, dan tampilan lain dipertahankan.
 
-Perbaikan: CTA subscribe diwajibkan sebagai dialog yang diucapkan karakter dan dipertahankan dalam prompt Google Flow. Bahasa Indonesia tetap default.
+Streamlit Secrets:
+CLARIOHUB_API_KEY = "API_KEY_KAMU"
 
-Jalankan: streamlit run app.py
-Tambahkan GEMINI_API_KEY di Streamlit Secrets.
+Model default: clario/gemini-3.7-flash
+Endpoint: https://clariohub.id/v1
