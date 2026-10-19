@@ -6,63 +6,63 @@ import streamlit as st
 from openai import OpenAI
 
 st.set_page_config(page_title="Global Shorts Studio", page_icon="🌎", layout="wide")
-st.title("🌎 Global Shorts Studio (Anti-Repetisi & Auto Subtitles)")
-st.caption("LOKALISASI BUDAYA OTOMATIS: HOOK → RESPON → TUDUHAN CTA → SKAKMAT PUNCHLINE")
+st.title("🌎 Global Shorts Studio (Dynamic CTA & Creative Plots)")
+st.caption("PREMIS BEBAS VARIATIF → HOOK 1 DETIK → KONFLIK 4-BEAT → CTA DINAMIS")
 
 CULTURAL_PRESETS = {
     "English": {
         "region_label": "United States / Global Western",
-        "creatures": "Classic Hollywood Zombie, Horror Clown, Attic Phantom, or Alien Invader",
-        "protagonist": "Suburban youth or gamer in casual hoodie/t-shirt",
-        "setting": "Suburban bedroom, dark garage, basement with neon gamer lighting",
-        "slang_tone": "Sharp internet slang ('Bro', 'Dude', 'Caught in 4K', 'Ain't no way')",
+        "creatures": "Classic Hollywood Zombie, Horror Clown, Attic Phantom, Alien Invader, or Creepy Neighbor",
+        "protagonist": "Suburban teenager, gamer, or night-shift worker",
+        "setting": "Suburban bedroom, dark basement, 24/7 convenience store, or misty garage",
+        "slang_tone": "Sharp internet slang ('Bro', 'Dude', 'Caught in 4K', 'Ain't no way', 'Lock in')",
         "default_hook": "STOP! DON'T SCROLL!"
     },
     "Español (Spanish)": {
         "region_label": "Latin America / Spain",
-        "creatures": "La Llorona, dramatic shrouded ghost, or gothic vampire",
-        "protagonist": "Expressive young adult with animated hand gestures",
-        "setting": "Colonial corridor, rustic courtyard, dim urban apartment",
-        "slang_tone": "Rhythmic Spanish banter ('¡Oye tú!', '¡Párate ahí!', '¡No manches!')",
+        "creatures": "La Llorona, dramatic shrouded ghost, mischievous goblin, or gothic vampire",
+        "protagonist": "Expressive young adult with animated body language",
+        "setting": "Colonial corridor, rustic kitchen at midnight, or dim apartment hallway",
+        "slang_tone": "Rhythmic Spanish comedic banter ('¡Oye tú!', '¡Párate ahí!', '¡No manches!', '¡Qué susto!')",
         "default_hook": "¡ALTO AHÍ! ¡NO HAGAS SCROLL!"
     },
     "日本語 (Japanese)": {
         "region_label": "Japan",
-        "creatures": "Classic Yūrei (pale long-haired spirit) or urban legend ghost",
-        "protagonist": "Expressive salaryman or university student",
-        "setting": "Cramped Tokyo 1R tatami room or dim convenience store alley",
-        "slang_tone": "Rapid dynamic banter ('おい！', 'ちょっと待って！', '嘘だろ？！')",
+        "creatures": "Classic Yūrei, Oni, mischievous Yokai, or bizarre urban entity",
+        "protagonist": "Tired salaryman, anime fan, or university student",
+        "setting": "Cramped Tokyo 1R tatami room, dark train platform, or narrow back alley",
+        "slang_tone": "Manzai boke-tsukkomi rapid comedic timing ('おい！', 'ちょっと待って！', '嘘だろ？！')",
         "default_hook": "待って！スクロールするな！"
     },
     "한국어 (Korean)": {
         "region_label": "South Korea",
-        "creatures": "Gwisin (pale ghost in white dress) or rooftop shadow entity",
-        "protagonist": "Trendy young Korean in oversized streetwear",
-        "setting": "Gosiwon room, rooftop room (oktapbang), stairwell",
-        "slang_tone": "Punchy Seoul comedic banter ('야!', '잠깐만!', '대박')",
+        "creatures": "Gwisin in white dress, rooftop shadow creature, or bizarre ghost",
+        "protagonist": "Trendy young Korean in oversized streetwear or internet cafe gamer",
+        "setting": "PC bang, rooftop room (oktapbang), gosiwon, or dimly lit stairwell",
+        "slang_tone": "Punchy Seoul conversational slang ('야!', '잠깐만!', '대박', '헐')",
         "default_hook": "잠깐! 넘기지 마!"
     },
     "Português (Portuguese)": {
         "region_label": "Brazil / Portugal",
-        "creatures": "Urban phantom, expressive zombie, humorous ghost",
-        "protagonist": "High-energy youth with theatrical expressions",
-        "setting": "Warm-toned urban living room or apartment balcony",
-        "slang_tone": "Lively Brazilian slang ('Ei você!', 'Para tudo!', 'Qual é, mano!')",
+        "creatures": "Urban phantom, expressive zombie, or funny mythical creature",
+        "protagonist": "High-energy youth with loud theatrical gestures",
+        "setting": "Warm-toned living room, messy bedroom, or urban backyard",
+        "slang_tone": "Lively Brazilian slang ('Ei você!', 'Para tudo!', 'Qual é, mano!', 'Caramba')",
         "default_hook": "PARA TUDO! NÃO PASSA O VÍDEO!"
     },
     "Bahasa Indonesia": {
         "region_label": "Indonesia",
-        "creatures": "Sosok kuntilanak pucat, pocong komedi, atau hantu rumah tua",
-        "protagonist": "Pemuda lokal berkaus santai dengan ekspresi kocak",
-        "setting": "Rumah kayu tua, teras kontrakan malam hari, kamar kos",
-        "slang_tone": "Bahasa gaul tongkrongan santai ('Woi!', 'Diem dulu!', 'Ketahuan lu!')",
+        "creatures": "Kuntilanak, pocong absurd, genderuwo nyasar, atau hantu kosan",
+        "protagonist": "Anak kosan, pemuda tongkrongan santai, atau gamer malam",
+        "setting": "Kamar kos remang, teras kontrakan malam hari, atau pos ronda",
+        "slang_tone": "Bahasa gaul tongkrongan ('Woi!', 'Diem dulu!', 'Gokil', 'Kena lu!')",
         "default_hook": "STOP! JANGAN SCROLL!"
     }
 }
 
 DEFAULT_GLOBAL_PRESET = {
     "region_label": "Global Universal",
-    "creatures": "Universal expressive monster or hooded phantom",
+    "creatures": "Universal expressive monster, alien, or hooded phantom",
     "protagonist": "Relatable everyday person in modern casual wear",
     "setting": "Dimly lit modern apartment room",
     "slang_tone": "Punchy native colloquial expressions",
@@ -74,6 +74,15 @@ LANGUAGES = list(CULTURAL_PRESETS.keys()) + [
     "हिन्दी (Hindi)", "Русский (Russian)", "Türkçe (Turkish)", "ไทย (Thai)",
     "Tiếng Việt (Vietnamese)", "Bahasa Melayu (Malay)", "Bahasa lain (isi sendiri)"
 ]
+
+CTA_STYLE_DESCRIPTIONS = {
+    "🎲 Acak Otomatis (Random)": "Pilih secara acak dari variasi taruhan, panik, suap, tuduhan, atau cliffhanger agar cerita selalu berganti.",
+    "🏆 Taruhan / Syarat": "Karakter menantang penonton (misal: 'Kalau lu kaget atau ketawa, wajib pencet subscribe!').",
+    "😱 Ancaman Lucu / Panik": "Karakter ketakutan atau heboh minta bantuan (misal: 'Pencet subscribe cepetan biar pintunya kekunci!').",
+    "🤝 Permintaan Maaf / Suap": "Karakter ketahuan berbuat konyol/salah (misal: 'Ampun bro! Sebagai gantinya subscribe channel ini deh!').",
+    "⏳ Gantung / Cliffhanger": "Karakter menghentikan momen kritis di akhir (misal: 'Mau liat kelanjutannya? Subscribe buat Part 2!').",
+    "👀 Tuduhan Konyol": "Karakter menuduh penonton dengan fakta receh (misal: 'Ketahuan mantengin doang tapi tombol merahnya anggurin!')."
+}
 
 BASE_URL = "https://clariohub.id/v1"
 
@@ -92,9 +101,9 @@ def call_gemini(key, model, prompt):
         model=model,
         messages=[
             {"role": "system", "content": (
-                "You are an expert YouTube Shorts director specializing in globally viral comedy skits. "
-                "Always generate unique, creative, non-repetitive premises tailored to target regions. "
-                "Return valid JSON only."
+                "You are an elite YouTube Shorts director specializing in viral 4-beat comedy skits. "
+                "You create highly original, unpredictable situations. "
+                "Always follow cultural constraints and return valid JSON only."
             )},
             {"role": "user", "content": prompt},
         ],
@@ -117,7 +126,6 @@ def call_gemini(key, model, prompt):
     return data
 
 def build_srt(dialogue_list):
-    """Menghasilkan file subtitle standar SubRip (.srt) sesuai durasi 10 detik."""
     time_map = [
         ("00:00:00,000", "00:00:01,200"),
         ("00:00:01,200", "00:00:03,000"),
@@ -140,7 +148,7 @@ def prompts(x, style, duration, language, cultural_info, text_mode):
     )
 
     if text_mode == "Video Bersih (Tanpa Teks AI - Edit di CapCut)":
-        caption_rule = "- RESTRICTIONS: Clean visual footage, NO on-screen subtitles, NO text overlays, NO captions (captions will be added in post-production)."
+        caption_rule = "- RESTRICTIONS: Clean visual footage, NO on-screen subtitles, NO text overlays, NO captions."
     else:
         caption_rule = (
             "- ON-SCREEN TEXT & CAPTIONS: Burn-in kinetic, centered word-by-word subtitles matching spoken dialogue in real-time. "
@@ -152,8 +160,8 @@ def prompts(x, style, duration, language, cultural_info, text_mode):
 
 VISUALS & ENVIRONMENT:
 - Setting: {cultural_info['setting']}
-- Character A (Instigator/Creature): {cultural_info['creatures']}
-- Character B (Reactor): {cultural_info['protagonist']}
+- Character A: {cultural_info['creatures']}
+- Character B: {cultural_info['protagonist']}
 
 TITLE: {x.get('title', '')}
 HOOK (0-1s): {x.get('hook', '')}
@@ -165,64 +173,63 @@ SCRIPT (STRICT SHOT-REVERSE-SHOT PACING):
 {dialogue}
 
 EDITING & SHOT BREAKDOWN:
-- Shot 1 (0–1s) [Close-Up]: Character A aggressively addresses camera ({x.get('hook', '')}).
+- Shot 1 (0–1s) [Close-Up]: Character A aggressively halts camera ({x.get('hook', '')}).
 - Shot 2 (1–3s) [Medium]: Character B reacts defensively in native colloquial slang.
-- Shot 3 (3–6s) [Close-Up]: Character A delivers the subscribe accusation straight into the lens.
-- Shot 4 (6–9s) [Two-Shot / Medium-Wide]: Character B roasts Character A, laughing while Character A freezes in awkward embarrassment.
+- Shot 3 (3–6s) [Close-Up]: Contextual subscribe callout tied organically to the plot.
+- Shot 4 (6–9s) [Two-Shot / Medium-Wide]: Final roast or twist punchline, laughing or dramatic freeze.
 
 {caption_rule}
 
-RESTRICTIONS: Photorealistic cinematic grade, natural lighting, sharp mobile readability, vertical 9:16 composition, seamless continuity across cuts."""
+RESTRICTIONS: Photorealistic cinematic grade, vertical 9:16 framing, seamless continuity across cuts."""
 
     x["thumbnail_prompt"] = f"""Viral 9:16 YouTube Shorts thumbnail for {cultural_info['region_label']}. Subject: {cultural_info['creatures']} staring into lens with extreme expression: {x.get('hook', '')}. Lighting: High-contrast chiaroscuro fitting {cultural_info['setting']}. Sharp mobile details, space left clean at bottom, no watermark."""
     x["srt_data"] = build_srt(dialogue_items)
     x.setdefault("hashtags", "#Shorts #Comedy #ViralSkit #Humor")
     return x
 
-def local_idea(cultural_info):
-    """Kumpulan template beragam agar judul dan cerita tidak macet di satu tema jika API offline."""
+def local_idea(cultural_info, chosen_cta):
     pool = [
         {
-            "title": "CAUGHT IN 4K NOT SUBSCRIBING! 😂",
-            "hook": f"Creature blocks camera: '{cultural_info['default_hook']}'",
-            "story": "Creature confronts viewer for binge-watching without subscribing, but gets roasted.",
+            "title": "ZOMBIE STEALS WIFI PASSWORD?! 🧟‍♂️📡",
+            "hook": "Zombie bangs on screen: 'HOLD UP! DON'T SWIPE!'",
+            "story": "A zombie sneaks into a room not to eat brains, but to get the WiFi password and demand subscribers.",
             "dialogue": [
-                {"time": "00:00–00:01", "speaker": "CREATURE", "line": cultural_info['default_hook']},
-                {"time": "00:01–00:03", "speaker": "HUMAN", "line": "Why are you screaming at me?!"},
-                {"time": "00:03–00:06", "speaker": "CREATURE", "line": "I know your secret... watching daily without hitting subscribe!"},
-                {"time": "00:06–00:09", "speaker": "HUMAN", "line": "Bro, you don't even have a channel! Hahaha!"}
+                {"time": "00:00–00:01", "speaker": "ZOMBIE", "line": "HOLD UP! DON'T SWIPE!"},
+                {"time": "00:01–00:03", "speaker": "GAMER", "line": "Bro, what are you doing in my room?!"},
+                {"time": "00:03–00:06", "speaker": "ZOMBIE", "line": "Give me the WiFi password or hit subscribe right now!"},
+                {"time": "00:06–00:09", "speaker": "GAMER", "line": "You've been buried for a century, why do you need 5G?! Hahaha!"}
             ],
-            "punchline": "Human bursts into mocking laughter while creature freezes in shame.",
-            "ending": "Creature lowers head in awkward silence.",
-            "hashtags": "#Shorts #Comedy #FunnySkit"
-        },
-        {
-            "title": "ZOMBIE WANTS SUBSCRIBERS?! 🧟‍♂️💀",
-            "hook": "Zombie bangs screen: 'DON'T SWIPE AWAY!'",
-            "story": "Zombie breaks into bedroom demanding subscribers instead of brains.",
-            "dialogue": [
-                {"time": "00:00–00:01", "speaker": "ZOMBIE", "line": "DON'T SWIPE AWAY!"},
-                {"time": "00:01–00:03", "speaker": "GAMER", "line": "Chill bro, don't eat my brain!"},
-                {"time": "00:03–00:06", "speaker": "ZOMBIE", "line": "Forget brains! You watched 10 videos without subscribing!"},
-                {"time": "00:06–00:09", "speaker": "GAMER", "line": "Bro, you've been dead for 200 years, why do you need an algorithm?!"}
-            ],
-            "punchline": "Gamer laughs uncontrollably as zombie looks down at his decayed hands.",
-            "ending": "Zombie shrugs and shambles away.",
+            "punchline": "Gamer bursts out laughing as the zombie stares awkwardly at his decayed hands.",
+            "ending": "Zombie slumps in defeat.",
             "hashtags": "#Shorts #ZombieComedy #GamingHumor"
         },
         {
-            "title": "ROBBER ASKS FOR SUBSCRIBE?! 💸🤣",
-            "hook": "Intruder points aggressively: 'FREEZE! HANDS UP!'",
-            "story": "A robber holds up a gamer but asks for YouTube subscribers instead of cash.",
+            "title": "THE MIDNIGHT FRIDGE MONSTER 🍕👻",
+            "hook": "Creature holding pizza slice shouts: 'CAUGHT IN 4K!'",
+            "story": "A basement ghost gets caught eating leftover pizza and tries to bribe the homeowner.",
             "dialogue": [
-                {"time": "00:00–00:01", "speaker": "ROBBER", "line": "FREEZE! HANDS UP!"},
-                {"time": "00:01–00:03", "speaker": "VICTIM", "line": "Take my wallet, please!"},
-                {"time": "00:03–00:06", "speaker": "ROBBER", "line": "Keep the cash! Hit the red subscribe button right now!"},
-                {"time": "00:06–00:09", "speaker": "VICTIM", "line": "Wait, are you a burglar or an unpaid intern?! Hahaha!"}
+                {"time": "00:00–00:01", "speaker": "GHOST", "line": "CAUGHT IN 4K!"},
+                {"time": "00:01–00:03", "speaker": "TENANT", "line": "Wait, you're the one eating my leftovers?!"},
+                {"time": "00:03–00:06", "speaker": "GHOST", "line": "Don't evict me! Just subscribe to the channel and I'll buy more pizza!"},
+                {"time": "00:06–00:09", "speaker": "TENANT", "line": "With what money? You've been dead since 1980! Hahaha!"}
             ],
-            "punchline": "Victim laughs while robber frantically checks YouTube Studio on his phone.",
-            "ending": "Robber sighs in defeat.",
-            "hashtags": "#Shorts #Parody #ComedyShorts"
+            "punchline": "Tenant laughs while ghost hides the empty pizza box behind its back.",
+            "ending": "Ghost floats away in embarrassment.",
+            "hashtags": "#Shorts #GhostPrank #MidnightSnack"
+        },
+        {
+            "title": "THE LAZY EXORCIST CHALLENGE 🕯️😂",
+            "hook": "Vampire points at camera: 'BET YOU CAN'T SCROLL!'",
+            "story": "A vampire makes a high-stakes comedy bet with the viewer.",
+            "dialogue": [
+                {"time": "00:00–00:01", "speaker": "VAMPIRE", "line": "BET YOU CAN'T SCROLL!"},
+                {"time": "00:01–00:03", "speaker": "HUMAN", "line": "Are you trying to hypnotize me?!"},
+                {"time": "00:03–00:06", "speaker": "VAMPIRE", "line": "If you laughed or flinched, you legally owe this channel a subscribe!"},
+                {"time": "00:06–00:09", "speaker": "HUMAN", "line": "I'm not laughing, your plastic fangs are falling out! Hahaha!"}
+            ],
+            "punchline": "Human points and laughs while vampire frantically adjusts loose plastic fangs.",
+            "ending": "Vampire hides his face in shame.",
+            "hashtags": "#Shorts #VampireHumor #ComedyChallenge"
         }
     ]
     return random.choice(pool)
@@ -236,16 +243,16 @@ with st.sidebar:
 
     model_options = {
         "Gemini 3.7 Flash": "clario/gemini-3.7-flash",
+        "GPT 5.6 Sol": "clario/gpt-5.6-sol",
         "DeepSeek V4 Pro": "clario/deepseek-v4-pro",
         "DeepSeek V4 Flash": "clario/deepseek-v4-flash",
-        "GLM 5.3 Flash": "clario/glm-5.3-flash",
-        "GPT 5.6 Sol": "clario/gpt-5.6-sol"
+        "GLM 5.3 Flash": "clario/glm-5.3-flash"
     }
     model = model_options[st.selectbox("Model AI", list(model_options.keys()), index=0)]
     st.divider()
 
-    st.header("🎯 Target Negara & Audiens")
-    lang_choice = st.selectbox("🌎 Bahasa & Budaya Target", LANGUAGES, index=0)
+    st.header("🎯 Target Budaya & Bahasa")
+    lang_choice = st.selectbox("🌎 Bahasa Target", LANGUAGES, index=0)
     target_language = st.text_input("Nama bahasa / Negara").strip() if lang_choice == "Bahasa lain (isi sendiri)" else lang_choice
     if not target_language:
         target_language = "English"
@@ -253,25 +260,35 @@ with st.sidebar:
     cultural_info = CULTURAL_PRESETS.get(target_language, DEFAULT_GLOBAL_PRESET)
 
     st.info(f"**Target:** {cultural_info['region_label']}\n\n"
-            f"**Karakter AI:** {cultural_info['creatures']}\n\n"
+            f"**Karakter:** {cultural_info['creatures']}\n\n"
             f"**Setting:** {cultural_info['setting']}")
+
+    st.header("💡 Format Ajakan Subscribe (CTA)")
+    cta_choice = st.selectbox("Gaya Ajakan Subscribe:", list(CTA_STYLE_DESCRIPTIONS.keys()), index=0)
+    st.caption(CTA_STYLE_DESCRIPTIONS[cta_choice])
 
     st.header("🎬 Output Teks Video")
     text_mode = st.radio(
         "Mode Teks untuk Flow:",
         ["Video Bersih (Tanpa Teks AI - Edit di CapCut)", "Teks Kuning Otomatis AI di Video"],
-        index=0,
-        help="Pilih 'Video Bersih' jika ingin menempelkan subtitle via file .srt di CapCut agar teks tidak dobel."
+        index=0
     )
 
     style = st.selectbox("Gaya Visual", [
         "Horor-komedi realistis (Creature vs Human)",
-        "Komedi absurd modern",
-        "Parodi bioskop horor Barat",
+        "Komedi absurd perkotaan",
+        "Parodi sci-fi / alien kocak",
         "Karakter bebas"
     ])
     duration = st.selectbox("Durasi", ["8 detik", "10 detik"], index=1)
-    avoid = st.text_input("Hindari topik/karakter (opsional)")
+
+# Area input ide cerita manual di layar utama
+st.subheader("📝 Ide / Topik Cerita (Opsional)")
+user_premise = st.text_input(
+    "Masukkan tema atau situasi konyol yang Anda inginkan:",
+    placeholder="Contoh: Hantu minjem charger HP, zombie numpang pesan gofood, alien kaget liat token listrik...",
+    help="Jika dikosongkan, AI akan membuat situasi komedi acak yang segar secara otomatis."
+)
 
 if "idea" not in st.session_state:
     st.session_state.idea = None
@@ -279,16 +296,30 @@ if "idea" not in st.session_state:
 if "history_titles" not in st.session_state:
     st.session_state.history_titles = []
 
-if st.button("🔥 GENERATE SKRIP BARU (ANTI-MONOTON)", type="primary", use_container_width=True):
+if st.button("🔥 GENERATE SKRIP BARU & SEGAR", type="primary", use_container_width=True):
     history_context = ", ".join(f'"{t}"' for t in st.session_state.history_titles[-6:]) or "None"
 
-    prompt = f"""Create ONE completely original, brand-new 8-10 second vertical YouTube Shorts comedy skit tailored for {cultural_info['region_label']}.
-OUTPUT LANGUAGE: {target_language}. All fields in natural colloquial {target_language}.
+    if cta_choice == "🎲 Acak Otomatis (Random)":
+        selected_cta_instruction = random.choice([
+            "CTA STYLE: BET / CHALLENGE ('If you laughed, you owe a subscribe!')",
+            "CTA STYLE: PANIC / SUDDEN THREAT ('Hit subscribe quick before the door locks!')",
+            "CTA STYLE: BRIBE / APOLOGY ('I'm sorry! Just subscribe and don't tell anyone!')",
+            "CTA STYLE: CLIFFHANGER ('Subscribe now for Part 2 disaster!')",
+            "CTA STYLE: CAUGHT IN THE ACT ('Binge-watching without clicking subscribe!')"
+        ])
+    else:
+        selected_cta_instruction = f"CTA STYLE: {cta_choice.upper()} - {CTA_STYLE_DESCRIPTIONS[cta_choice]}"
 
-CREATIVE ANTI-REPETITION MANDATE:
+    user_premise_instruction = f"MANDATORY USER PREMISE: {user_premise}" if user_premise.strip() else "USER PREMISE: Invent a fresh, unpredictable comedic confrontation."
+
+    prompt = f"""Create ONE completely original, hilarious 8-10 second vertical YouTube Shorts comedy skit tailored for {cultural_info['region_label']}.
+OUTPUT LANGUAGE: {target_language}. All dialogue, title, hook, and punchline must be in natural colloquial {target_language}.
+
+PREMISE & UNIQUENESS MANDATE:
+- {user_premise_instruction}
 - RECENT TITLES GENERATED: [{history_context}]
-- You MUST create a DIFFERENT situation, setup, and catchy viral title every time. Do NOT repeat or slightly alter recent titles.
-- Explore varied comic setups: midnight fridge raid, alien abduction, workout session, gamer rage, bank robbery parody, parking ticket, etc.
+- AVOID REPETITION: Do NOT repeat identical jokes, same roast lines, or identical setups.
+- Tone: Punchy internet humor, viral pacing, memorable banter.
 
 CULTURAL MANDATE:
 - Region: {cultural_info['region_label']}
@@ -297,11 +328,15 @@ CULTURAL MANDATE:
 - Setting: {cultural_info['setting']}
 - Slang: {cultural_info['slang_tone']}
 
-BEAT PACING:
-1. HOOK (00:00–00:01): Creature aggressively halts camera with a sharp command (e.g. 'STOP!', 'FREEZE!', 'HOLD UP!', 'DON'T SCROLL!'). Vary the opening word.
-2. REACTION (00:01–00:03): Human reacts with defensive, confused native slang.
-3. ACCUSATION (00:03–00:06): Creature points to camera, accusing viewer/human of watching without hitting subscribe.
-4. ROAST PUNCHLINE (00:06–00:09): Human roasts creature back with a witty logic twist, laughing while creature freezes in embarrassment.
+CTA INTEGRATION RULE:
+- {selected_cta_instruction}
+- Weave the subscribe callout NATURALLY into Beat 3 or Beat 4 as part of the joke.
+
+STRUCTURAL 4-BEAT PACING:
+1. BEAT 1 - THE HOOK (00:00–00:01): Creature aggressively halts the camera (1-3 words max, e.g. 'STOP!', 'FREEZE!', 'HOLD UP!', 'DON'T SCROLL!').
+2. BEAT 2 - THE REACTION (00:01–00:03): Human reacts defensively in native colloquial slang.
+3. BEAT 3 - THE TWIST / CTA (00:03–00:06): The absurd request / subscribe callout emerges.
+4. BEAT 4 - THE PUNCHLINE ROAST (00:06–00:09): The other character roasts back with hilarious reality check, ending in laughter or awkward shock.
 
 Return valid JSON only with keys: title, hook, story, dialogue (array of 4 objects with time, speaker, line), punchline, ending, hashtags, cta_note."""
 
@@ -316,8 +351,8 @@ Return valid JSON only with keys: title, hook, story, dialogue (array of 4 objec
             st.session_state.history_titles = st.session_state.history_titles[-10:]
     except Exception as e:
         st.error(f"Gagal generate API: {e}")
-        st.warning("Memuat template cadangan acak...")
-        st.session_state.idea = prompts(local_idea(cultural_info), style, duration, target_language, cultural_info, text_mode)
+        st.warning("Memuat ide cadangan...")
+        st.session_state.idea = prompts(local_idea(cultural_info, cta_choice), style, duration, target_language, cultural_info, text_mode)
 
 x = st.session_state.idea
 if x:
@@ -329,13 +364,13 @@ if x:
 
     with t1:
         st.markdown("**1. HOOK 1 DETIK**"); st.write(x.get("hook", ""))
-        st.markdown("**2. PREMIS & SETTING**"); st.write(x.get("story", ""))
+        st.markdown("**2. PREMIS & ALUR**"); st.write(x.get("story", ""))
         st.markdown("**3. DIALOG LENGKAP**")
         for d in x.get("dialogue", []):
             if isinstance(d, dict):
                 st.write(f"⏱️ **{d.get('time', '')} | {d.get('speaker', '')}** : \"{d.get('line', '')}\"")
         st.markdown("**4. PUNCHLINE SKAKMAT**"); st.write(x.get("punchline", ""))
-        st.markdown("**5. ENDING**"); st.write(x.get("ending", ""))
+        st.markdown("**5. REAKSI ENDING**"); st.write(x.get("ending", ""))
 
     with t2:
         st.caption(f"Prompt Google Flow (Mode: {text_mode}):")
