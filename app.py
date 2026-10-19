@@ -38,7 +38,7 @@ def call_gemini(key, model, prompt):
         messages=[
             {"role": "system", "content": (
                 "You are an expert YouTube Shorts comedy writer. "
-                "Write punchy 8-10 second 4-beat skits: aggressive hook -> confused reaction -> "
+                "Write punchy 8-10 second 4-beat skits: aggressive diverse hook -> confused reaction -> "
                 "fourth-wall subscribe accusation -> savage punchline roast. Return valid JSON only."
             )},
             {"role": "user", "content": prompt},
@@ -84,7 +84,7 @@ DIALOGUE SCRIPT (PRESERVE EXACT TIMING & ACTORS):
 {dialogue}
 
 EDITING & SHOT BREAKDOWN:
-- Shot 1 (0–1s) [Extreme Close-Up]: Character A aggressively breaks the 4th wall, shouting/pointing straight into the lens. Instant high energy.
+- Shot 1 (0–1s) [Extreme Close-Up]: Character A aggressively breaks the 4th wall, shouting/pointing or startling straight into the lens. Instant high energy pattern-interrupt.
 - Shot 2 (1–3s) [Medium Shot Cut]: Character B flinches back in utter confusion/defensiveness.
 - Shot 3 (3–6s) [Close-Up Cut]: Character A points aggressively, delivering the funny subscribe accusation directly to camera with animated CTA energy.
 - Shot 4 (6–9s) [Two-Shot / Medium-Wide Cut]: Character B roasts Character A with the reality check punchline, bursting into laughter while Character A freezes in awkward shock.
@@ -107,10 +107,10 @@ def local_idea():
     pool = [
       {
         "title": "HANTU GAK PUNYA CHANNEL! 👻😂",
-        "hook": "Hantu berteriak melotot ke arah kamera: 'WOI!'",
+        "hook": "Hantu berteriak melotot menunjuk layar: 'STOP! JANGAN SCROLL!'",
         "story": "Hantu memarahi penonton karena nonton tanpa subscribe, tapi malah diskakmat manusia.",
         "dialogue": [
-          {"time": "00:00–00:01", "speaker": "HANTU", "line": "WOI!"},
+          {"time": "00:00–00:01", "speaker": "HANTU", "line": "STOP! JANGAN SCROLL!"},
           {"time": "00:01–00:03", "speaker": "MANUSIA", "line": "Kenapa gue?!"},
           {"time": "00:03–00:06", "speaker": "HANTU", "line": "Gue tahu kebiasaan lu... nonton terus tapi gak subscribe!"},
           {"time": "00:06–00:09", "speaker": "MANUSIA", "line": "Lah, lu aja gak punya channel! Hahaha!"}
@@ -120,18 +120,32 @@ def local_idea():
         "hashtags": "#Shorts #KomediHoror #HororLucu"
       },
       {
+        "title": "KETAHUAN NONTON DOANG! 🤣👀",
+        "hook": "Karakter mendekatkan muka ke kamera berbisik tajam: 'Psst... ketahuan lu ya!'",
+        "story": "Sosok seram memergoki penonton yang cuma nonton gratisan tanpa memencet tombol subscribe.",
+        "dialogue": [
+          {"time": "00:00–00:01", "speaker": "SOSOK", "line": "Psst... ketahuan lu ya!"},
+          {"time": "00:01–00:03", "speaker": "TEMAN", "line": "Ketahuan apaan sih?!"},
+          {"time": "00:03–00:06", "speaker": "SOSOK", "line": "Lu mantengin video dari tadi tapi tombol subscribe didiemin!"},
+          {"time": "00:06–00:09", "speaker": "TEMAN", "line": "Lah, jempol gue lagi pegel, kenapa lu yang sewot?!"}
+        ],
+        "punchline": "Teman ngakak sambil memperlihatkan jempolnya, sosok misterius langsung garuk-garuk kepala.",
+        "ending": "Sosok tersebut mundur perlahan dengan ekspresi canggung.",
+        "hashtags": "#Shorts #KomediAbsurd #NgakakKocak"
+      },
+      {
         "title": "NAGIH UTANG ATAU SUBSCRIBE?! 💸🤣",
-        "hook": "Tukang tagih melotot menunjuk kamera: 'HEI KAMU!'",
+        "hook": "Tukang tagih mengetuk layar kamera keras-keras: 'TOK-TOK-TOK! BUKA!'",
         "story": "Debt collector mendatangi pria tapi dialognya melenceng ke urusan subscribe.",
         "dialogue": [
-          {"time": "00:00–00:01", "speaker": "PENAGIH", "line": "HEI KAMU!"},
+          {"time": "00:00–00:01", "speaker": "PENAGIH", "line": "TOK-TOK-TOK! BUKA!"},
           {"time": "00:01–00:03", "speaker": "WARGA", "line": "Gue belum gajian, Bang!"},
-          {"time": "00:03–00:06", "speaker": "PENAGIH", "line": "Bukan duit! Lu nonton tiap hari tapi kenapa gak subscribe?!"},
+          {"time": "00:03–00:06", "speaker": "PENAGIH", "line": "Bukan nagih duit! Nonton tiap hari tapi kenapa gak subscribe?!"},
           {"time": "00:06–00:09", "speaker": "WARGA", "line": "Dih, lu penagih utang apa YouTuber pemula?!"}
         ],
         "punchline": "Warga ngakak sambil menunjuk balik penagih utang yang salah tingkah.",
-        "ending": "Penagih utang garuk-garuk kepala kebingungan.",
-        "hashtags": "#Shorts #KomediAbsurd #NgakakKocak"
+        "ending": "Penagih utang kebingungan sendiri.",
+        "hashtags": "#Shorts #KomediLucu #ParodiKocak"
       }
     ]
     return random.choice(pool)
@@ -170,7 +184,7 @@ with st.sidebar:
     style = st.selectbox("Gaya visual", [
         "Horor-komedi realistis (Hantu vs Manusia)",
         "Komedi absurd realistis",
-        "Parodi kriminal kocak",
+        "Parodi kriminal / Debt collector kocak",
         "Karakter bebas"
     ])
     duration = st.selectbox("Durasi (Google Flow)", ["8 detik", "10 detik"], index=1)
@@ -190,14 +204,23 @@ if st.button("🔥 GENERATE SKRIP 4-BEAT", type="primary", use_container_width=T
 OUTPUT LANGUAGE: {target_language}. Write title, hook, story, dialogue, punchline, ending, hashtags, and cta_note in {target_language}.
 
 STRUCTURAL BLUEPRINT (Strict 4-beat pacing):
-1. BEAT 1 - THE HOOK (00:00–00:01): Karakter A mendadak menyerang/meneriaki kamera/penonton dengan satu seruan tegas (misal: "WOI!", "STOP!", atau tuduhan kaget).
-2. BEAT 2 - THE REACTION (00:01–00:03): Karakter B merespons kaget atau bingung (misal: "Kenapa gue?!", "Ada apa nih?").
-3. BEAT 3 - THE CTA ACCUSATION (00:03–00:06): Karakter A mendobrak fourth-wall dan menuduh penonton/Karakter B (misal: "Gue tahu kebiasaan lu... nonton doang tapi kagak subscribe!").
-4. BEAT 4 - THE PUNCHLINE ROAST (00:06–00:09): Karakter B membalikkan keadaan dengan punchline skakmat yang mempermalukan Karakter A (misal: membalas fakta konyol sehingga Karakter A terdiam melongo), ditutup tawa.
+1. BEAT 1 - THE HOOK (00:00–00:01): Karakter A mendadak menghentikan penonton dengan aksi kejut instan.
+2. BEAT 2 - THE REACTION (00:01–00:03): Karakter B merespons bingung atau defensif.
+3. BEAT 3 - THE CTA ACCUSATION (00:03–00:06): Karakter A mendobrak fourth-wall menuduh penonton/Karakter B nonton tanpa subscribe.
+4. BEAT 4 - THE PUNCHLINE ROAST (00:06–00:09): Karakter B membalikkan keadaan dengan punchline skakmat yang mempermalukan Karakter A, ditutup tawa.
+
+HOOK DIVERSITY RULES (WAJIB DIBUAT VARIATIF, JANGAN MONOTON):
+- DILARANG selalu menggunakan kata 'WOI!'.
+- Rotasikan gaya hook pembuka (1-3 kata kuat) menggunakan salah satu tipe berikut:
+  1. Perintah Stop Instan: 'STOP!', 'JANGAN DISCROLL!', 'DIEM DI SITU!', 'TAHAN DULU!'
+  2. Tuduhan Langsung: 'KETAHUAN LU!', 'HEI KAMU!', 'NGAKU SEKARANG!', 'MAU KABUR KE MANA?!'
+  3. Bisikan Tegas/Suspense: 'Psst... dengerin!', 'Ssst... jangan pergi dulu!', 'Pst! Hei!'
+  4. Suara/Aksi Fisik Mendadak: Ketukan layar ('Tok-tok-tok! Buka!'), gerakan menahan layar ke depan kamera.
+- Hook harus langsung meledak dalam 1 detik pertama menatap lurus ke arah penonton.
 
 DIALOGUE REQUIREMENTS:
 - Tepat 4 baris dialog yang mewakili 4 beat di atas.
-- Gunakan bahasa percakapan sehari-hari yang luwes, jangan kaku/formal.
+- Gunakan bahasa percakapan sehari-hari yang santai, luwes, dan alami (hindari tata bahasa buku yang kaku).
 - Beat 3 WAJIB berisi tuduhan subscribe. Beat 4 WAJIB berupa punchline balasan (roasting).
 
 Visual style: {style}. Humor type: {humor}. Duration: {duration}. Avoid: {avoid or 'none'}.
@@ -222,7 +245,7 @@ if x:
     t1, t2, t3, t4 = st.tabs(["Struktur Skit (4-Beat)", "Prompt Video Flow", "Prompt Thumbnail", "Evaluasi Subscriber"])
 
     with t1:
-        st.markdown("**1. HOOK JUMPSCARE (0–1s)**")
+        st.markdown("**1. HOOK 1 DETIK PERTAMA (0–1s)**")
         st.write(x.get("hook", ""))
 
         st.markdown("**2. CERITA & SETUP**")
