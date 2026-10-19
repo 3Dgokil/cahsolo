@@ -5,56 +5,57 @@ import re
 import streamlit as st
 from openai import OpenAI
 
-st.set_page_config(page_title="Global Shorts Studio", page_icon="🌎", layout="wide")
-st.title("🌎 Global Shorts Studio (Auto Subtitles)")
-st.caption("LOKALISASI BUDAYA + HOOK 4-BEAT + CAPTION DINAMIS OTOMATIS")
+st.set_page_config(page_title="Global Shorts Subscriber Studio", page_icon="🌎", layout="wide")
+st.title("🌎 Global Shorts Subscriber Studio")
+st.caption("LOKALISASI BUDAYA OTOMATIS: HOOK → RESPON → TUDUHAN CTA → SKAKMAT PUNCHLINE")
 
+# Database Lokalisasi Visual & Karakter Berdasarkan Bahasa/Target Negara
 CULTURAL_PRESETS = {
     "English": {
         "region_label": "United States / Global Western",
-        "creatures": "Classic Hollywood Zombie, Horror Clown, or Attic Phantom",
-        "protagonist": "Suburban youth in casual hoodie/t-shirt",
-        "setting": "Suburban bedroom, dark basement with neon gamer lighting",
-        "slang_tone": "Sharp internet slang ('Bro', 'Dude', 'Caught in 4K')",
+        "creatures": "Classic Hollywood Zombie, Creepy Attic Ghost, Horror Clown, or Suburban Shadow Monster",
+        "protagonist": "Suburban teenager or young adult in casual hoodie/t-shirt",
+        "setting": "Suburban bedroom, dark garage, or basement with neon gamer lighting",
+        "slang_tone": "Sharp conversational slang (e.g., 'Bro', 'Dude', 'Caught red-handed')",
         "default_hook": "STOP! DON'T SCROLL!"
     },
     "Español (Spanish)": {
         "region_label": "Latin America / Spain",
         "creatures": "La Llorona, dramatic shrouded ghost, or gothic vampire",
-        "protagonist": "Expressive young adult with animated hand gestures",
-        "setting": "Colonial corridor, rustic courtyard, dim urban apartment",
-        "slang_tone": "Rhythmic Spanish banter ('¡Oye tú!', '¡Párate ahí!')",
+        "protagonist": "Expressive young man/woman with exaggerated hand gestures",
+        "setting": "Colonial corridor, rustic courtyard, or dimly lit urban living room",
+        "slang_tone": "Expressive, rhythmic Spanish comedic banter ('¡Oye tú!', '¡Párate ahí!')",
         "default_hook": "¡ALTO AHÍ! ¡NO HAGAS SCROLL!"
     },
     "日本語 (Japanese)": {
         "region_label": "Japan",
-        "creatures": "Classic Yūrei (pale long-haired spirit) or urban legend ghost",
-        "protagonist": "Expressive salaryman or university student",
-        "setting": "Cramped Tokyo 1R tatami room or dim convenience store alley",
-        "slang_tone": "Rapid dynamic banter ('おい！', 'ちょっと待って！')",
+        "creatures": "Classic Yūrei (Sadako-style pale spirit), Oni, or bizarre urban legend apparition",
+        "protagonist": "Overworked salaryman or expressive Japanese student",
+        "setting": "Cramped Tokyo 1R tatami apartment or dim convenience store alley",
+        "slang_tone": "Manzai style boke-tsukkomi rapid dynamic dialogue ('おい！', 'ちょっと待って！')",
         "default_hook": "待って！スクロールするな！"
     },
     "한국어 (Korean)": {
         "region_label": "South Korea",
-        "creatures": "Gwisin (pale ghost in white dress) or rooftop shadow entity",
+        "creatures": "Gwisin (pale ghost in white hanbok or school uniform) or creepy modern apparition",
         "protagonist": "Trendy young Korean in oversized streetwear",
-        "setting": "Gosiwon room, rooftop room (oktapbang), stairwell",
-        "slang_tone": "Punchy Seoul comedic banter ('야!', '잠깐만!')",
+        "setting": "Gosiwon room, rooftop room (oktapbang), or neon-lit stairwell",
+        "slang_tone": "Punchy modern Seoul comedic banter ('야!', '잠깐만!')",
         "default_hook": "잠깐! 넘기지 마!"
     },
     "Português (Portuguese)": {
         "region_label": "Brazil / Portugal",
-        "creatures": "Urban phantom, expressive zombie, humorous ghost",
-        "protagonist": "High-energy youth with theatrical expressions",
-        "setting": "Warm-toned urban living room or apartment balcony",
-        "slang_tone": "Lively Brazilian slang ('Ei você!', 'Para tudo!')",
+        "creatures": "Urban phantom, exaggerated zombie, or humorous haunting entity",
+        "protagonist": "High-energy Brazilian reacting with loud theatrical expressions",
+        "setting": "Warm-toned urban living room or backyard with fairy lights",
+        "slang_tone": "Lively, colloquial Brazilian energy ('Ei você!', 'Para tudo!')",
         "default_hook": "PARA TUDO! NÃO PASSA O VÍDEO!"
     },
     "Bahasa Indonesia": {
         "region_label": "Indonesia",
         "creatures": "Sosok kuntilanak pucat, pocong komedi, atau hantu rumah tua",
         "protagonist": "Pemuda lokal berkaus santai dengan ekspresi kocak",
-        "setting": "Rumah kayu tua, teras kontrakan malam hari, kamar kos",
+        "setting": "Rumah kayu tua, teras kontrakan malam hari, atau kamar kos",
         "slang_tone": "Bahasa gaul tongkrongan santai ('Woi!', 'Diem dulu!', 'Ketahuan lu!')",
         "default_hook": "STOP! JANGAN SCROLL!"
     }
@@ -62,8 +63,8 @@ CULTURAL_PRESETS = {
 
 DEFAULT_GLOBAL_PRESET = {
     "region_label": "Global Universal",
-    "creatures": "Universal expressive monster or hooded phantom",
-    "protagonist": "Relatable everyday person in modern casual wear",
+    "creatures": "Universal expressive monster, comic zombie, or hooded phantom",
+    "protagonist": "Relatable everyday young person in modern casual wear",
     "setting": "Dimly lit modern apartment room",
     "slang_tone": "Punchy native colloquial expressions",
     "default_hook": "WAIT! DON'T SWIPE!"
@@ -79,9 +80,9 @@ BASE_URL = "https://clariohub.id/v1"
 
 def api_key():
     try:
-        val = st.secrets.get("CLARIOHUB_API_KEY", "")
-        if val:
-            return str(val).strip()
+        value = st.secrets.get("CLARIOHUB_API_KEY", "")
+        if value:
+            return str(value).strip()
     except Exception:
         pass
     return os.getenv("CLARIOHUB_API_KEY", "").strip()
@@ -92,8 +93,9 @@ def call_gemini(key, model, prompt):
         model=model,
         messages=[
             {"role": "system", "content": (
-                "You are an expert YouTube Shorts director specializing in global comedy. "
-                "Adapt visuals, folklore, and slang to the target region. Return valid JSON only."
+                "You are an elite YouTube Shorts director specializing in globally viral, "
+                "culturally authentic comedy skits. You adapt visuals, characters, folklore, "
+                "and slang strictly to the viewer's target culture. Return valid JSON only."
             )},
             {"role": "user", "content": prompt},
         ],
@@ -102,84 +104,75 @@ def call_gemini(key, model, prompt):
     )
     text = response.choices[0].message.content
     if not text:
-        raise RuntimeError("API tidak mengembalikan respons.")
-    text = re.sub(r"^```(?:json)?\s*", "", text.strip(), flags=re.IGNORECASE)
+        raise RuntimeError("API tidak mengembalikan teks.")
+    text = text.strip()
+    text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.IGNORECASE)
     text = re.sub(r"\s*```$", "", text)
     try:
         data = json.loads(text)
     except json.JSONDecodeError as exc:
-        s, e = text.find("{"), text.rfind("}")
-        if s >= 0 and e > s:
-            data = json.loads(text[s:e + 1])
+        start, end = text.find("{"), text.rfind("}")
+        if start >= 0 and end > start:
+            data = json.loads(text[start:end + 1])
         else:
-            raise RuntimeError("Respons model bukan format JSON valid.") from exc
+            raise RuntimeError("Respons model bukan JSON valid. Coba lagi.") from exc
+    if not isinstance(data, dict):
+        raise RuntimeError("Format respons model tidak sesuai.")
     return data
 
-def build_srt(dialogue_list):
-    """Menghasilkan teks berformat standar SubRip (.srt)."""
-    srt_lines = []
-    time_map = [
-        ("00:00:00,000", "00:00:01,200"),
-        ("00:00:01,200", "00:00:03,000"),
-        ("00:00:03,000", "00:00:06,000"),
-        ("00:00:06,000", "00:00:09,000")
-    ]
-    for idx, d in enumerate(dialogue_list[:4], 1):
-        start, end = time_map[idx - 1]
-        line = d.get("line", "")
-        speaker = d.get("speaker", "SPEAKER")
-        srt_lines.append(f"{idx}\n{start} --> {end}\n{speaker}: {line}\n")
-    return "\n".join(srt_lines)
-
 def prompts(x, style, duration, language, cultural_info):
+    """Menyusun prompt Flow & Thumbnail yang dikunci ke elemen visual target negara."""
     dialogue_items = [d for d in x.get("dialogue", []) if isinstance(d, dict)]
     dialogue = "\n".join(
-        f'{d.get("time", "")} | {d.get("speaker", "CHAR")}: "{d.get("line", "")}"'
+        f'{d.get("time", "")} | {d.get("speaker", "CHARACTER")}: "{d.get("line", "")}"'
         for d in dialogue_items
     )
 
-    x["flow_prompt"] = f"""Create ONE coherent {duration} vertical 9:16 {style} YouTube Short for {cultural_info['region_label']}.
+    x["flow_prompt"] = f"""Create ONE coherent, photorealistic {duration} vertical 9:16 YouTube Short skit tailored for {cultural_info['region_label']} audiences.
 
-VISUALS:
-- Setting: {cultural_info['setting']}
-- Character A: {cultural_info['creatures']}
-- Character B: {cultural_info['protagonist']}
+VISUAL STYLE & CULTURAL CONTEXT:
+- Genre: {style}
+- Target Setting: {cultural_info['setting']}
+- Character A (Instigator/Creature): {cultural_info['creatures']}
+- Character B (Reactor): {cultural_info['protagonist']}
 
-SCRIPT:
+TITLE: {x.get('title', '')}
+HOOK (0-1s): {x.get('hook', '')}
+PREMISE: {x.get('story', '')}
+PUNCHLINE: {x.get('punchline', '')}
+ENDING: {x.get('ending', '')}
+
+DIALOGUE SCRIPT (STRICT TIMING & LIP-SYNC):
 {dialogue}
 
-PACING (SHOT-REVERSE-SHOT):
-- Shot 1 (0–1s) [Close-Up]: Character A aggressively addresses camera ({x.get('hook', '')}).
-- Shot 2 (1–3s) [Medium]: Character B reacts defensively in native slang.
-- Shot 3 (3–6s) [Close-Up]: Character A delivers the subscribe accusation to camera.
-- Shot 4 (6–9s) [Two-Shot]: Character B roasts Character A, laughing while Character A freezes in shock.
+EDITING & SHOT BREAKDOWN (PUNCHY GLOBAL SKIT PACING):
+- Shot 1 (0–1s) [Extreme Close-Up]: Character A aggressively halts the viewer, staring directly into the lens. Instant universal pattern interrupt.
+- Shot 2 (1–3s) [Medium Shot Cut]: Character B flinches back in confusion, matching culturally natural gestures.
+- Shot 3 (3–6s) [Close-Up Cut]: Character A points into the camera, delivering the viral subscribe callout with dynamic comedic intensity.
+- Shot 4 (6–9s) [Two-Shot / Medium-Wide Cut]: Character B delivers the reality-check roast punchline, laughing loudly while Character A freezes in awkward defeat.
 
-DYNAMIC ON-SCREEN TEXT & CAPTIONS:
-- Burn-in kinetic, centered word-by-word subtitles matching spoken dialogue in real-time.
-- Font: Bold modern sans-serif, high-contrast bright yellow with black border.
-- Highlight the first hook word aggressively on-screen in red/yellow flash.
+CINEMATOGRAPHY & RESTRICTIONS:
+- Authentic cultural styling (wardrobe, architecture, lighting) fitting {cultural_info['region_label']}.
+- Photorealistic cinematic grade, vertical 9:16 composition.
+- Seamless character continuity across cuts. No subtitles, no watermarks, no glitchy artifacts."""
 
-RESTRICTIONS: Photorealistic, cinematic lighting, sharp mobile readability, vertical 9:16 framing."""
-
-    x["thumbnail_prompt"] = f"""Viral 9:16 YouTube Shorts thumbnail for {cultural_info['region_label']}. Subject: {cultural_info['creatures']} staring into lens with shock expression: {x.get('hook', '')}. Lighting: High-contrast chiaroscuro fitting {cultural_info['setting']}. Sharp mobile details, space at bottom, no watermark."""
-    x["srt_data"] = build_srt(dialogue_items)
+    x["thumbnail_prompt"] = f"""Create a viral, high-contrast vertical 9:16 YouTube Shorts thumbnail targeting {cultural_info['region_label']}. Subject: {cultural_info['creatures']} breaking the 4th wall, staring directly into lens with extreme expression: {x.get('hook', '')}. Lighting: Cinematic high-contrast chiaroscuro fitting {cultural_info['setting']}. Sharp mobile-screen readability. Space left clean at bottom. No text overlays, no watermarks."""
     x.setdefault("hashtags", "#Shorts #Comedy #ViralSkit #Humor")
     return x
 
 def local_idea(cultural_info):
-    dialogue = [
-        {"time": "00:00–00:01", "speaker": "CREATURE", "line": cultural_info['default_hook']},
-        {"time": "00:01–00:03", "speaker": "HUMAN", "line": "Why are you screaming at me?!"},
-        {"time": "00:03–00:06", "speaker": "CREATURE", "line": "I know your secret... watching daily without hitting subscribe!"},
-        {"time": "00:06–00:09", "speaker": "HUMAN", "line": "Bro, you don't even have a channel! Hahaha!"}
-    ]
     return {
-        "title": "CAUGHT WATCHING WITHOUT SUBSCRIBING! 😂",
-        "hook": f"Creature blocks camera: '{cultural_info['default_hook']}'",
-        "story": "Creature confronts viewer for not subscribing, but gets instantly roasted.",
-        "dialogue": dialogue,
-        "punchline": "Human bursts into mocking laughter while creature freezes in shame.",
-        "ending": "Creature stares in awkward silence.",
+        "title": "NO CHANNEL, NO EXCUSE! 😂",
+        "hook": f"Creature confronts camera: '{cultural_info['default_hook']}'",
+        "story": "Creature confronts the viewer for watching without subscribing, but gets roasted instantly.",
+        "dialogue": [
+            {"time": "00:00–00:01", "speaker": "CREATURE", "line": cultural_info['default_hook']},
+            {"time": "00:01–00:03", "speaker": "HUMAN", "line": "Why you screaming at me?!"},
+            {"time": "00:03–00:06", "speaker": "CREATURE", "line": "I know your dirty secret... watching everyday without subscribing!"},
+            {"time": "00:06–00:09", "speaker": "HUMAN", "line": "Bro, you don't even have a YouTube channel! Hahaha!"}
+        ],
+        "punchline": "Human bursts into mocking laughter while the creature freezes in sheer embarrassment.",
+        "ending": "Creature lowers head in awkward silence.",
         "hashtags": "#Shorts #Comedy #FunnySkit"
     }
 
@@ -187,8 +180,13 @@ with st.sidebar:
     st.header("Pengaturan API")
     key = api_key()
     if not key:
-        key = st.text_input("API Key ClarioHub", type="password").strip()
+        key = st.text_input(
+            "API Key ClarioHub",
+            type="password",
+            help="Key ini disimpan sementara untuk sesi ini."
+        ).strip()
     st.write("ClarioHub API:", "✅ Key tersedia" if key else "⚠️ Masukkan API key")
+    st.caption(f"Endpoint: {BASE_URL}")
 
     model_options = {
         "Gemini 3.7 Flash": "clario/gemini-3.7-flash",
@@ -197,48 +195,57 @@ with st.sidebar:
         "GLM 5.3 Flash": "clario/glm-5.3-flash",
         "GPT 5.6 Sol": "clario/gpt-5.6-sol"
     }
-    model = model_options[st.selectbox("Model AI", list(model_options.keys()), index=0)]
+    selected_model_label = st.selectbox("Model AI", list(model_options.keys()), index=0)
+    model = model_options[selected_model_label]
     st.divider()
 
     st.header("🎯 Target Negara & Audiens")
-    lang_choice = st.selectbox("🌎 Bahasa & Budaya Target", LANGUAGES, index=0)
-    target_language = st.text_input("Nama bahasa / Negara").strip() if lang_choice == "Bahasa lain (isi sendiri)" else lang_choice
-    if not target_language:
-        target_language = "English"
+    language_choice = st.selectbox("🌎 Bahasa & Budaya Target", LANGUAGES, index=0)
+    if language_choice == "Bahasa lain (isi sendiri)":
+        custom_language = st.text_input("Nama bahasa / Negara", placeholder="Contoh: German, Thai, Italian")
+        target_language = custom_language.strip() or "English"
+    else:
+        target_language = language_choice
 
+    # Ambil data kultur otomatis berdasarkan bahasa yang dipilih
     cultural_info = CULTURAL_PRESETS.get(target_language, DEFAULT_GLOBAL_PRESET)
 
-    st.info(f"**Target:** {cultural_info['region_label']}\n\n"
-            f"**Karakter:** {cultural_info['creatures']}\n\n"
+    st.info(f"**Target Wilayah:** {cultural_info['region_label']}\n\n"
+            f"**Karakter AI:** {cultural_info['creatures']}\n\n"
             f"**Setting:** {cultural_info['setting']}")
 
     style = st.selectbox("Gaya Visual", [
-        "Horor-komedi realistis (Creature vs Human)",
-        "Komedi absurd modern",
+        "Horor-komedi realistis (Universal Creature vs Human)",
+        "Komedi absurd perkotaan realistis",
+        "Parodi bioskop horor Barat",
         "Karakter bebas"
     ])
-    duration = st.selectbox("Durasi", ["8 detik", "10 detik"], index=1)
+    duration = st.selectbox("Durasi (Google Flow)", ["8 detik", "10 detik"], index=1)
     avoid = st.text_input("Hindari topik/karakter (opsional)")
 
 if "idea" not in st.session_state:
     st.session_state.idea = None
 
-if st.button("🔥 GENERATE GLOBAL SKIT & AUTO-CAPTIONS", type="primary", use_container_width=True):
-    prompt = f"""Create ONE original 8-10 second vertical YouTube Shorts comedy skit tailored for {cultural_info['region_label']}.
-OUTPUT LANGUAGE: {target_language}. All fields in natural colloquial {target_language}.
+if st.button("🔥 GENERATE GLOBAL SKIT 4-BEAT", type="primary", use_container_width=True):
+    prompt = f"""Create ONE original 8-10 second vertical YouTube Shorts comedy skit tailored for {cultural_info['region_label']} audiences.
+OUTPUT LANGUAGE: {target_language}. All dialogue, title, hook, story, punchline, ending, and notes must be in natural colloquial {target_language}.
 
-CULTURAL MANDATE:
-- Region: {cultural_info['region_label']}
-- Creature: {cultural_info['creatures']}
+CULTURAL & VISUAL LOCALIZATION MANDATE:
+- Target Region: {cultural_info['region_label']}
+- Creature/Instigator: {cultural_info['creatures']}
 - Protagonist: {cultural_info['protagonist']}
 - Setting: {cultural_info['setting']}
-- Slang: {cultural_info['slang_tone']}
+- Dialogue Tone: {cultural_info['slang_tone']} (MUST sound like native internet humor, NOT translated text).
 
-BEAT PACING:
-1. HOOK (00:00–00:01): Creature halts camera directly with sharp command (e.g., similar to '{cultural_info['default_hook']}'). Vary the opening words.
-2. REACTION (00:01–00:03): Human reacts with confused slang.
-3. ACCUSATION (00:03–00:06): Creature points to camera, accusing viewer of watching without subscribing.
-4. ROAST PUNCHLINE (00:06–00:09): Human roasts creature back (e.g. has no channel), laughing while creature freezes in shame.
+STRUCTURAL BLUEPRINT (Strict 4-beat pacing):
+1. BEAT 1 - THE HOOK (00:00–00:01): Creature aggressively confronts camera directly with a sudden, punchy command/shout (1-3 words max, e.g., similar to '{cultural_info['default_hook']}'). Do NOT repeat the exact same word every time.
+2. BEAT 2 - THE REACTION (00:01–00:03): Human reacts with defensive, confused colloquial slang.
+3. BEAT 3 - THE CTA ACCUSATION (00:03–00:06): Creature breaks fourth-wall, pointing at screen and accusing the viewer/human of binge-watching without hitting subscribe.
+4. BEAT 4 - THE PUNCHLINE ROAST (00:06–00:09): Human roasts creature back with an undeniable logic twist (e.g. creature having no channel, dead internet, etc.), bursting into laughter while creature freezes in shame.
+
+DIALOGUE REQUIREMENTS:
+- Exactly 4 rapid dialogue lines for the 4 beats.
+- Highly authentic native slang and comedic cadence.
 
 Return valid JSON only with keys: title, hook, story, dialogue (array of 4 objects with time, speaker, line), punchline, ending, hashtags, cta_note."""
 
@@ -248,40 +255,58 @@ Return valid JSON only with keys: title, hook, story, dialogue (array of 4 objec
         result = call_gemini(key, model.strip(), prompt)
         st.session_state.idea = prompts(result, style, duration, target_language, cultural_info)
     except Exception as e:
-        st.error(f"Gagal generate API: {e}")
-        st.warning("Memuat template cadangan...")
+        st.error(f"Gagal generate via API: {e}")
+        st.warning("Memuat template cadangan global...")
         st.session_state.idea = prompts(local_idea(cultural_info), style, duration, target_language, cultural_info)
 
 x = st.session_state.idea
 if x:
     st.divider()
-    st.subheader(x.get("title", "Ide Shorts"))
+    st.subheader(x.get("title", "Ide Shorts Global"))
     st.code(x.get("hashtags", "#Shorts #Comedy #Funny"))
 
-    t1, t2, t3, t4 = st.tabs(["Struktur Skit", "Prompt Video + Caption", "File Subtitle (.SRT)", "Thumbnail"])
+    t1, t2, t3, t4 = st.tabs(["Struktur Skit Terlokalisasi", "Prompt Google Flow (Visual Target)", "Prompt Thumbnail", "Evaluasi Subscriber"])
 
     with t1:
-        st.markdown("**1. HOOK 1 DETIK**"); st.write(x.get("hook", ""))
-        st.markdown("**2. PREMIS & SETTING**"); st.write(x.get("story", ""))
-        st.markdown("**3. DIALOG LENGKAP**")
+        st.markdown("**1. HOOK BUDAYA TARGET (0–1s)**")
+        st.write(x.get("hook", ""))
+
+        st.markdown("**2. SETTING & PREMIS LOKAL**")
+        st.write(x.get("story", ""))
+
+        st.markdown("**3. DIALOG ASLI NATIVE**")
         for d in x.get("dialogue", []):
             if isinstance(d, dict):
                 st.write(f"⏱️ **{d.get('time', '')} | {d.get('speaker', '')}** : \"{d.get('line', '')}\"")
-        st.markdown("**4. PUNCHLINE SKAKMAT**"); st.write(x.get("punchline", ""))
-        st.markdown("**5. ENDING**"); st.write(x.get("ending", ""))
+
+        st.markdown("**4. PUNCHLINE SKAKMAT (6–9s)**")
+        st.write(x.get("punchline", ""))
+
+        st.markdown("**5. REAKSI ENDING**")
+        st.write(x.get("ending", ""))
 
     with t2:
-        st.caption("Prompt Google Flow (otomatis menyertakan instruksi burn-in subtitle kuning dinamis):")
-        st.text_area("Prompt Video Flow", x.get("flow_prompt", ""), height=330)
+        st.caption("Prompt Google Flow (otomatis mengunci karakter, kostum, dan setting negara target):")
+        st.text_area("Salin Prompt Video Flow", x.get("flow_prompt", ""), height=350)
 
     with t3:
-        st.caption("Subtitle standar .SRT siap impor ke CapCut, Premiere Pro, atau DaVinci Resolve:")
-        st.text_area("Isi File Subtitle (.srt)", x.get("srt_data", ""), height=220)
-        st.download_button("⬇️ Unduh Subtitle (.srt)", x.get("srt_data", ""), file_name="shorts_captions.srt", mime="text/plain")
+        st.caption("Prompt Thumbnail yang disesuaikan dengan estetika visual global:")
+        st.text_area("Salin Prompt Thumbnail", x.get("thumbnail_prompt", ""), height=220)
 
     with t4:
-        st.caption("Prompt Thumbnail 9:16:")
-        st.text_area("Prompt Thumbnail", x.get("thumbnail_prompt", ""), height=200)
+        col1, col2, col3 = st.columns(3)
+        views = col1.number_input("Views Video Global", min_value=0, step=100)
+        subs = col2.number_input("Subscriber Baru", min_value=0, step=1)
+        retention = col3.number_input("Average Percentage Viewed (%)", 0.0, 100.0, step=0.5)
+        if views > 0:
+            cr = (subs / views) * 100
+            st.metric("Tingkat Konversi Subscriber (CR)", f"{cr:.2f}%")
+        st.caption("Untuk audiens global, pastikan retensi detik 0–1 di atas 80% agar algoritma mendorong ke negara target.")
 
-    data = {k: x.get(k) for k in ["title", "hashtags", "hook", "story", "dialogue", "punchline", "ending", "flow_prompt", "srt_data", "thumbnail_prompt"]}
-    st.download_button("⬇️ Unduh Paket Lengkap JSON", json.dumps(data, ensure_ascii=False, indent=2), "global_shorts_package.json", "application/json")
+    data = {k: x.get(k) for k in ["title", "hashtags", "hook", "story", "dialogue", "punchline", "ending", "flow_prompt", "thumbnail_prompt"]}
+    st.download_button(
+        "⬇️ Unduh Paket Ide Terlokalisasi JSON",
+        json.dumps(data, ensure_ascii=False, indent=2),
+        "global_shorts_localized.json",
+        "application/json"
+    )
